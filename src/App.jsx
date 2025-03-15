@@ -3,21 +3,37 @@ import './App.css'
 
  function App() {
   const [todo, setTodo] = useState("");
-  const [listItem, setListItem] = useState([]);
-  const [toggle, setToggle] = useState({}); 
+
+  const [listItem, setListItem] = useState(
+    () => JSON.parse(localStorage.getItem("tasks")) || []
+  );
+
+  const [toggle, setToggle] = useState(
+    ()=> JSON.parse(localStorage.getItem("status")) || []
+  ); 
 
    useEffect(() => {
       localStorage.setItem("tasks", JSON.stringify(listItem));
     }, [listItem]);
 
-  const checkTodo = () => {
-    if(todo === "" || todo.length > 250) {
+    useEffect (() => {
+      localStorage.setItem("status", JSON.stringify(toggle));
+    }, [toggle])
+  const checkTodo = (t) => {
+ 
+    if(t === "") {
       alert("Vui lòng nhập todo hợp lệ");
       setTodo("");
       return false
     }
 
-    if(listItem.includes(todo)) {
+    if(t.length >= 250) {
+      alert("Todo nhập không được quá 250 ký tự")
+      setTodo("");
+      return false
+    }
+
+    if(listItem.includes(t)) {
       alert("Todo đã tồn tại");
       setTodo("");
       return false
@@ -27,26 +43,32 @@ import './App.css'
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if(!checkTodo()) return;
+    if(!todo.trim()) {
+      alert("Không được để trống");
+      setTodo("");
+      return 
+    }
+    if(!checkTodo(todo)) return;
     setListItem([todo, ...listItem])
     setTodo("");
   }
 
- const handleEdit = (index) => {
-    const newTodo = window.prompt("Sửa công việc:", listItem[index]);
-    if(newTodo === null) return
+  const handleEdit = (index) => {
+    const newTodo = window.prompt("Sửa công việc:", listItem[index]).trim();
+    if (newTodo === null) return;
 
-    if(newTodo === "" || listItem.includes(newTodo)) {
-      alert("Yêu cầu nhập hợp lệ.")
-      return handleEdit(index)
+    if(newTodo === listItem[index]) { 
+      return
     }
 
-    if (newTodo !== null) {
-      const updatedList = [...listItem];
-      updatedList[index] = newTodo;
-      setListItem(updatedList);
+    if (!checkTodo(newTodo)) {
+        return handleEdit(index); 
     }
-  };
+  
+    const updatedList = [...listItem];
+    updatedList[index] = newTodo;
+    setListItem(updatedList);
+};
   
   const toggleTodo = (index) => {
     setToggle({
