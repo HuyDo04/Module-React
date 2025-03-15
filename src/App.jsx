@@ -27,7 +27,7 @@ import './App.css'
       return false
     }
 
-    if(t.length >= 250) {
+    if(t.length > 250) {
       alert("Todo nhập không được quá 250 ký tự")
       setTodo("");
       return false
